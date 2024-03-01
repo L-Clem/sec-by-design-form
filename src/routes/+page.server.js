@@ -1,13 +1,24 @@
+import { error } from '@sveltejs/kit';
+import { RateLimiter } from 'sveltekit-rate-limiter/server';
 import { nodeMailer } from '$lib/server/nodeMailer';
 import { sanitizeMail } from '$lib/server/sanitizer';
 import { OUTLOOK_MAIL_USER } from '$env/static/private';
+
+const limiter = new RateLimiter({
+    IP: [5, 'h']
+})
+
+/** @type {import('./$types').PageServerLoad} */
+export async function load(event) {
+    if (await limiter.isLimited(event)) throw error(429);
+};
 
 /** @type {import('./$types').Actions} */
 export const actions = {
     default: async ({ request }) => {
         const formData = await request.formData()
-        const recipient = formData.get("recipient") ? String(formData.get("recipient")) : OUTLOOK_MAIL_USER
-        const email = String(formData.get("email"))
+        const recipient = formData.get("recipient") ? sanitizeMail(String(formData.get("recipient"))) : OUTLOOK_MAIL_USER
+        const email = sanitizeMail(String(formData.get("email")))
         const message = sanitizeMail(String(formData.get("message")))
 
         let mailer = nodeMailer();
