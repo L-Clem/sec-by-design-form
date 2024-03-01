@@ -1,12 +1,12 @@
 import nodemailer from 'nodemailer';
-import { OUTLOOK_MAIL_USER, OUTLOOK_MAIL_PASSWORD } from '$env/static/private';
+import { MAIL_USER, MAIL_PASSWORD, MAIL_SERVICE } from '$env/static/private';
 
 export function nodeMailer() {
     let transporter = nodemailer.createTransport({
-        service: "Outlook365",
+        service: MAIL_SERVICE,
         auth: {
-            user: OUTLOOK_MAIL_USER,
-            pass: OUTLOOK_MAIL_PASSWORD,
+            user: MAIL_USER,
+            pass: MAIL_PASSWORD,
         },        
     })
     return transporter;
